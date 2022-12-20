@@ -30,10 +30,11 @@ const createUser = (req, res) => {
   User.create({ name, about, avatar })
     .then((user) => res.status(201).send(user))
     .catch((err) => {
-      if (err.errors.name.name === 'ValidatorError') {
+      // eslint-disable-next-line no-underscore-dangle
+      if (err._message === 'user validation failed') {
         return res.status(INVALID_DATA_ERROR_CODE).send({ message: 'Переданы некорректные данные при создании пользователя.' });
       }
-      return res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' });
+      return res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка.', ...err });
     });
 };
 const updateUserInfo = (req, res) => {

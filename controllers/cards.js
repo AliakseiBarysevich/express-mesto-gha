@@ -16,10 +16,11 @@ const createCard = (req, res) => {
   Card.create({ name, link, owner })
     .then((card) => res.status(201).send(card))
     .catch((err) => {
-      if (err.errors.name.name === 'ValidatorError') {
+      // eslint-disable-next-line no-underscore-dangle
+      if (err._message === 'card validation failed') {
         return res.status(INVALID_DATA_ERROR_CODE).send({ message: 'Переданы некорректные данные при создании карточки.' });
       }
-      return res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' });
+      return res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка.', ...err });
     });
 };
 const deleteCard = (req, res) => {
