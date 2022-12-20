@@ -19,6 +19,9 @@ const getUser = (req, res) => {
       return res.status(200).send(user);
     })
     .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(INVALID_DATA_ERROR_CODE).send({ message: 'Указан некорректный _id.' });
+      }
       if (err.message === 'User not found') {
         return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь по указанному _id не найден.' });
       }

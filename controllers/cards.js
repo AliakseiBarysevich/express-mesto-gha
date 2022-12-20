@@ -7,8 +7,9 @@ const SERVER_ERROR = 500;
 
 const getAllCards = (req, res) => {
   Card.find({}).select('-__v')
+    .populate('owner')
     .then((cards) => res.status(200).send(cards))
-    .catch((err) => res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' }));
+    .catch((err) => res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка.', ...err }));
 };
 const createCard = (req, res) => {
   const { name, link } = req.body;
@@ -32,6 +33,9 @@ const deleteCard = (req, res) => {
       return res.status(200).send({ message: 'Пост удалён' });
     })
     .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(INVALID_DATA_ERROR_CODE).send({ message: 'Указан некорректный _id карточки.' });
+      }
       if (err.message === 'Card not found') {
         return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Карточка с указанным _id не найдена.' });
       }
@@ -40,6 +44,7 @@ const deleteCard = (req, res) => {
 };
 const likeCard = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true }).select('-__v')
+    .populate('owner')
     .then((card) => {
       if (!card) {
         throw new Error('Card not found');
@@ -58,6 +63,7 @@ const likeCard = (req, res) => {
 };
 const dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true }).select('-__v')
+    .populate('owner')
     .then((card) => {
       if (!card) {
         throw new Error('Card not found');
