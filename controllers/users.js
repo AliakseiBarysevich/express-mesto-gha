@@ -47,7 +47,8 @@ const updateUserInfo = (req, res) => {
       return res.status(200).send(user);
     })
     .catch((err) => {
-      if (err.errors.name.name === 'ValidatorError') {
+      // eslint-disable-next-line no-underscore-dangle
+      if (err._message === 'Validation failed') {
         return res.status(INVALID_DATA_ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
       }
       if (err.message === 'User not found') {
@@ -66,13 +67,14 @@ const updateUserAvatar = (req, res) => {
       return res.status(200).send(user);
     })
     .catch((err) => {
-      if (err.errors.name.name === 'ValidatorError') {
+      // eslint-disable-next-line no-underscore-dangle
+      if (err._message === 'Validation failed') {
         return res.status(INVALID_DATA_ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
       }
       if (err.message === 'User not found') {
         return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь по указанному _id не найден.' });
       }
-      return res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' });
+      return res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка.', ...err });
     });
 };
 
