@@ -12,15 +12,11 @@ const getAllUsers = (req, res) => {
 };
 const getUser = (req, res) => {
   User.findById(req.params.id).select('-__v')
-    .then((user) => {
-      if (!user) {
-        throw new Error('User not found');
-      }
-      return res.status(200).send(user);
-    })
+    .orFail(new Error('User not found'))
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(INVALID_DATA_ERROR_CODE).send({ message: 'Указан некорректный _id.' });
+        return res.status(INVALID_DATA_ERROR_CODE).send({ message: 'Указан некорректный _id.', ...err });
       }
       if (err.message === 'User not found') {
         return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь по указанному _id не найден.' });
@@ -37,7 +33,7 @@ const createUser = (req, res) => {
       if (err._message === 'user validation failed') {
         return res.status(INVALID_DATA_ERROR_CODE).send({ message: 'Переданы некорректные данные при создании пользователя.' });
       }
-      return res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка.', ...err });
+      return res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' });
     });
 };
 const updateUserInfo = (req, res) => {
@@ -77,7 +73,7 @@ const updateUserAvatar = (req, res) => {
       if (err.message === 'User not found') {
         return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Пользователь по указанному _id не найден.' });
       }
-      return res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка.', ...err });
+      return res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' });
     });
 };
 

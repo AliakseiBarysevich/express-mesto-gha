@@ -9,7 +9,7 @@ const getAllCards = (req, res) => {
   Card.find({}).select('-__v')
     .populate('owner')
     .then((cards) => res.status(200).send(cards))
-    .catch((err) => res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка.', ...err }));
+    .catch((err) => res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' }));
 };
 const createCard = (req, res) => {
   const { name, link } = req.body;
@@ -21,17 +21,13 @@ const createCard = (req, res) => {
       if (err._message === 'card validation failed') {
         return res.status(INVALID_DATA_ERROR_CODE).send({ message: 'Переданы некорректные данные при создании карточки.' });
       }
-      return res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка.', ...err });
+      return res.status(SERVER_ERROR).send({ message: 'На сервере произошла ошибка.' });
     });
 };
 const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => {
-      if (!card) {
-        throw new Error('Card not found');
-      }
-      return res.status(200).send({ message: 'Пост удалён' });
-    })
+    .orFail(new Error('Card not found'))
+    .then((card) => res.status(200).send({ message: 'Пост удалён' }))
     .catch((err) => {
       if (err.name === 'CastError') {
         return res.status(INVALID_DATA_ERROR_CODE).send({ message: 'Указан некорректный _id карточки.' });
@@ -45,12 +41,8 @@ const deleteCard = (req, res) => {
 const likeCard = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true }).select('-__v')
     .populate('owner')
-    .then((card) => {
-      if (!card) {
-        throw new Error('Card not found');
-      }
-      return res.status(200).send(card);
-    })
+    .orFail(new Error('Card not found'))
+    .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
         return res.status(INVALID_DATA_ERROR_CODE).send({ message: 'Переданы некорректные данные для постановки лайка.' });
@@ -64,12 +56,8 @@ const likeCard = (req, res) => {
 const dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true }).select('-__v')
     .populate('owner')
-    .then((card) => {
-      if (!card) {
-        throw new Error('Card not found');
-      }
-      return res.status(200).send(card);
-    })
+    .orFail(new Error('Card not found'))
+    .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
         return res.status(INVALID_DATA_ERROR_CODE).send({ message: 'Переданы некорректные данные для снятия лайка.' });
