@@ -7,16 +7,12 @@ const BadRequestError = require('../errors/bad-request-err');
 const NotFoundError = require('../errors/not-found-err');
 const ConflictingRequestError = require('../errors/conflicting-request-err');
 const UnauthorizedError = require('../errors/unauthorized-err');
-const ServerError = require('../errors/server-err');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 const getAllUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send(users))
-    .catch((err) => {
-      throw new ServerError('На сервере произошла ошибка.');
-    })
     .catch(next);
 };
 const getUser = (req, res) => {
@@ -30,7 +26,6 @@ const getUser = (req, res) => {
       if (err.message === 'User not found') {
         throw new NotFoundError('Пользователь по указанному _id не найден.');
       }
-      throw new ServerError('На сервере произошла ошибка.');
     })
     .catch(next);
 };
@@ -45,7 +40,6 @@ const getCurrentUser = (req, res) => {
       if (err.message === 'User not found') {
         throw new NotFoundError('Пользователь по указанному _id не найден.');
       }
-      throw new ServerError('На сервере произошла ошибка.');
     })
     .catch(next);
 };
@@ -67,7 +61,6 @@ const createUser = (req, res) => {
       if (err.code === 11000) {
         throw new ConflictingRequestError('Переданы некорректные данные при создании пользователя.');
       }
-      throw new ServerError('На сервере произошла ошибка.');
     })
     .catch(next);
 };
@@ -88,7 +81,6 @@ const updateUserInfo = (req, res) => {
       if (err.message === 'User not found') {
         throw new NotFoundError('Пользователь по указанному _id не найден.');
       }
-      throw new ServerError('На сервере произошла ошибка.');
     })
     .catch(next);
 };
@@ -109,17 +101,14 @@ const updateUserAvatar = (req, res) => {
       if (err.message === 'User not found') {
         throw new NotFoundError('Пользователь по указанному _id не найден.');
       }
-      throw new ServerError('На сервере произошла ошибка.');
     })
     .catch(next);
 };
 const login = (req, res) => {
   const { email, password } = req.body;
-
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
-
       res.send({ token });
     })
     .catch((err) => {

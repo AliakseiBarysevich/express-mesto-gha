@@ -8,4 +8,4 @@ const cardsRoutes = require('./cards');
 routes.use('/users', auth, usersRoutes);
 routes.use('/cards', auth, cardsRoutes);
 
-module.exports = { routes };
+module.exports = routes;
