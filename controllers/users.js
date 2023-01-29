@@ -54,10 +54,11 @@ const createUser = (req, res) => {
     }))
     .then((user) => res.status(201).send(user))
     .catch((err) => {
+      console.log(err);
       // eslint-disable-next-line no-underscore-dangle
-      // if (err._message === 'user validation failed') {
-      //   throw new BadRequestError('Переданы некорректные данные при создании пользователя.');
-      // }
+      if (err._message === 'user validation failed') {
+        throw new BadRequestError('Переданы некорректные данные при создании пользователя.');
+      }
       if (err.code === 11000) {
         throw new ConflictingRequestError('Переданы некорректные данные при создании пользователя.');
       }
