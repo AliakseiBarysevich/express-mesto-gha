@@ -8,6 +8,7 @@ const NotFoundError = require('../errors/not-found-err');
 const ConflictingRequestError = require('../errors/conflicting-request-err');
 const UnauthorizedError = require('../errors/unauthorized-err');
 
+const MONGO_EMAIL_DUPLICATE_ERROR_CODE = 11000;
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 const getAllUsers = (req, res) => {
@@ -43,7 +44,7 @@ const getCurrentUser = (req, res) => {
     })
     .catch(next);
 };
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -51,18 +52,19 @@ const createUser = (req, res) => {
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
-    }))
-    .then((user) => res.status(201).send(user))
-    .catch((err) => {
-      console.log(err);
-      // eslint-disable-next-line no-underscore-dangle
-      if (err._message === 'user validation failed') {
-        throw new BadRequestError('Переданы некорректные данные при создании пользователя.');
-      }
-      if (err.code === 11000) {
-        throw new ConflictingRequestError('Переданы некорректные данные при создании пользователя.');
-      }
     })
+      .then((user) => res.status(201).send(user))
+      .catch((err) => {
+        console.log(err);
+        // eslint-disable-next-line no-underscore-dangle
+        if (err._message === 'user validation failed') {
+          throw new BadRequestError('Переданы некорректные данные при создании пользователя.');
+        }
+        if (err.code === MONGO_EMAIL_DUPLICATE_ERROR_CODE) {
+          throw new ConflictingRequestError('Переданы некорректные данные при создании пользователя.');
+        }
+        next(err);
+      }))
     .catch(next);
 };
 const updateUserInfo = (req, res) => {
@@ -110,7 +112,7 @@ const login = (req, res) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
-      res.send({ token });
+      res.stasus(200).send({ token });
     })
     .catch((err) => {
       throw new UnauthorizedError('Произошла ошибка аутентификации');

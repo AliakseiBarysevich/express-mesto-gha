@@ -4,6 +4,7 @@ const { celebrate, Joi } = require('celebrate');
 const {
   getAllCards, createCard, deleteCard, likeCard, dislikeCard,
 } = require('../controllers/cards');
+const { validateUrl } = require('../utils/validateUrl');
 
 const validationConfig = {
   params: Joi.object().keys({
@@ -17,7 +18,7 @@ cardsRoutes.get('/', getAllCards);
 cardsRoutes.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required(),
+    link: Joi.string().required().custom(validateUrl),
   }),
 }), express.json(), createCard);
 cardsRoutes.delete('/:cardId', celebrate(validationConfig), deleteCard);

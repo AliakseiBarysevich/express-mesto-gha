@@ -8,5 +8,3 @@ function validateUrl(url) {
 }
 
 module.exports = { validateUrl };
-
-// /https?:\/\/(www\.)?[0-9a-z\-\._~:\/?#\[]@!$&'\(\)*\+,;=]{2,}#?$/i

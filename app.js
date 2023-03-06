@@ -4,7 +4,7 @@ const cors = require('cors');
 require('dotenv').config();
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-// const { errors } = require('celebrate');
+const { errors } = require('celebrate');
 const NotFoundError = require('./errors/not-found-err');
 
 const app = express();
@@ -25,7 +25,7 @@ app.use(cors());
 app.use('/', routes);
 app.use('*', (req, res, next) => next(new NotFoundError('Страница не найдена')));
 
-// app.use(errors());
+app.use(errors());
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
