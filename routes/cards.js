@@ -20,7 +20,7 @@ cardsRoutes.post('/', celebrate({
     name: Joi.string().required().min(2).max(30),
     link: Joi.string().required().custom(validateUrl),
   }),
-}), express.json(), createCard);
+}), createCard);
 cardsRoutes.delete('/:cardId', celebrate(validationConfig), deleteCard);
 cardsRoutes.put('/:cardId/likes', celebrate(validationConfig), likeCard);
 cardsRoutes.delete('/:cardId/likes', celebrate(validationConfig), dislikeCard);

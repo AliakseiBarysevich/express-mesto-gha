@@ -20,11 +20,11 @@ usersRoutes.patch('/me', celebrate({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
   }),
-}), express.json(), updateUserInfo);
+}), updateUserInfo);
 usersRoutes.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
     avatar: Joi.string().required().custom(validateUrl),
   }),
-}), express.json(), updateUserAvatar);
+}), updateUserAvatar);
 
 module.exports = usersRoutes;
