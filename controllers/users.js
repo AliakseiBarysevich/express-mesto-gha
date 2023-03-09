@@ -53,7 +53,9 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     })
-      .then((user) => res.status(201).send(user))
+      .then((user) => res.status(201).send({
+        name: user.name, about: user.about, avatar: user.avatar, email: user.email,
+      }))
       .catch((err) => {
         console.log(err);
         // eslint-disable-next-line no-underscore-dangle
