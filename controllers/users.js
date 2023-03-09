@@ -11,12 +11,12 @@ const UnauthorizedError = require('../errors/unauthorized-err');
 const MONGO_EMAIL_DUPLICATE_ERROR_CODE = 11000;
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-const getAllUsers = (req, res) => {
+const getAllUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send(users))
     .catch(next);
 };
-const getUser = (req, res) => {
+const getUser = (req, res, next) => {
   User.findById(req.params.id).select('-__v')
     .orFail(new Error('User not found'))
     .then((user) => res.status(200).send(user))
@@ -30,7 +30,7 @@ const getUser = (req, res) => {
     })
     .catch(next);
 };
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id).select('-__v')
     .orFail(new Error('User not found'))
     .then((user) => res.status(200).send(user))
@@ -57,7 +57,6 @@ const createUser = (req, res, next) => {
         name: user.name, about: user.about, avatar: user.avatar, email: user.email,
       }))
       .catch((err) => {
-        console.log(err);
         // eslint-disable-next-line no-underscore-dangle
         if (err._message === 'user validation failed') {
           throw new BadRequestError('Переданы некорректные данные при создании пользователя.');
@@ -69,7 +68,7 @@ const createUser = (req, res, next) => {
       }))
     .catch(next);
 };
-const updateUserInfo = (req, res) => {
+const updateUserInfo = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true }).select('-__v')
     .then((user) => {
@@ -89,7 +88,7 @@ const updateUserInfo = (req, res) => {
     })
     .catch(next);
 };
-const updateUserAvatar = (req, res) => {
+const updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true }).select('-__v')
     .then((user) => {
@@ -109,7 +108,7 @@ const updateUserAvatar = (req, res) => {
     })
     .catch(next);
 };
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
