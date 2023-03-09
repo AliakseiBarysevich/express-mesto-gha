@@ -113,7 +113,7 @@ const login = (req, res, next) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
-      res.stasus(200).send({ token });
+      res.status(200).send({ token });
     })
     .catch((err) => {
       throw new UnauthorizedError('Произошла ошибка аутентификации');
