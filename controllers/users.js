@@ -16,8 +16,8 @@ const getAllUsers = (req, res, next) => {
     .then((users) => res.status(200).send(users))
     .catch(next);
 };
-const getUser = (req, res, next) => {
-  User.findById(req.params.id).select('-__v')
+const getCurrentUser = (req, res, next) => {
+  User.findById(req.user._id).select('-__v')
     .orFail(new Error('User not found'))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
@@ -30,8 +30,8 @@ const getUser = (req, res, next) => {
     })
     .catch(next);
 };
-const getCurrentUser = (req, res, next) => {
-  User.findById(req.user._id).select('-__v')
+const getUserById = (req, res, next) => {
+  User.findById(req.params.id).select('-__v')
     .orFail(new Error('User not found'))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
@@ -122,5 +122,5 @@ const login = (req, res, next) => {
 };
 
 module.exports = {
-  getAllUsers, getUser, getCurrentUser, createUser, updateUserInfo, updateUserAvatar, login,
+  getAllUsers, getUserById, getCurrentUser, createUser, updateUserInfo, updateUserAvatar, login,
 };
