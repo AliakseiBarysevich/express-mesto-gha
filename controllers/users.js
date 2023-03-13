@@ -18,28 +18,25 @@ const getAllUsers = (req, res, next) => {
 };
 const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail(new Error('User not found'))
+    .orFail(() => new NotFoundError('Пользователь с указанным id не существует'))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestError('Указан некорректный _id.');
+        next(new BadRequestError('Указан некорректный _id.'));
+      } else {
+        next(err);
       }
-      if (err.message === 'User not found') {
-        throw new NotFoundError('Пользователь по указанному _id не найден.');
-      }
-    })
-    .catch(next);
+    });
 };
 const getUserById = (req, res, next) => {
   User.findById(req.params.id)
-    .orFail(new Error('User not found'))
+    .orFail(() => new NotFoundError('Пользователь с указанным id не существует'))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestError('Указан некорректный _id.');
-      }
-      if (err.message === 'User not found') {
-        throw new NotFoundError('Пользователь по указанному _id не найден.');
+        next(new BadRequestError('Указан некорректный _id.'));
+      } else {
+        next(err);
       }
     })
     .catch(next);
@@ -59,41 +56,39 @@ const createUser = (req, res, next) => {
       .catch((err) => {
         // eslint-disable-next-line no-underscore-dangle
         if (err._message === 'user validation failed') {
-          throw new BadRequestError('Переданы некорректные данные при создании пользователя.');
+          next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
         }
         if (err.code === MONGO_EMAIL_DUPLICATE_ERROR_CODE) {
-          throw new ConflictingRequestError('Переданы некорректные данные при создании пользователя.');
+          next(new ConflictingRequestError('Переданы некорректные данные при создании пользователя.'));
+        } else {
+          next(err);
         }
-        next(err);
-      }))
-    .catch(next);
+      }));
 };
 const updateUserInfo = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new Error('User not found');
+        next(new NotFoundError('Пользователь по указанному _id не найден.'));
       }
       return res.status(200).send(user);
     })
     .catch((err) => {
       // eslint-disable-next-line no-underscore-dangle
       if (err._message === 'Validation failed') {
-        throw new BadRequestError('Переданы некорректные данные при обновлении профиля.');
+        next(new BadRequestError('Переданы некорректные данные при обновлении профиля.'));
+      } else {
+        next(err);
       }
-      if (err.message === 'User not found') {
-        throw new NotFoundError('Пользователь по указанному _id не найден.');
-      }
-    })
-    .catch(next);
+    });
 };
 const updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new Error('User not found');
+        next(new NotFoundError('Пользователь по указанному _id не найден.'));
       }
       return res.status(200).send(user);
     })
@@ -101,12 +96,10 @@ const updateUserAvatar = (req, res, next) => {
       // eslint-disable-next-line no-underscore-dangle
       if (err._message === 'Validation failed') {
         throw new BadRequestError('Переданы некорректные данные при обновлении аватара.');
+      } else {
+        next(err);
       }
-      if (err.message === 'User not found') {
-        throw new NotFoundError('Пользователь по указанному _id не найден.');
-      }
-    })
-    .catch(next);
+    });
 };
 const login = (req, res, next) => {
   const { email, password } = req.body;
@@ -116,7 +109,7 @@ const login = (req, res, next) => {
       res.status(200).send({ token });
     })
     .catch((err) => {
-      throw new UnauthorizedError('Произошла ошибка аутентификации');
+      next(new UnauthorizedError('Произошла ошибка аутентификации'));
     })
     .catch(next);
 };
