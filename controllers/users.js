@@ -17,7 +17,7 @@ const getAllUsers = (req, res, next) => {
     .catch(next);
 };
 const getCurrentUser = (req, res, next) => {
-  User.findById(req.user._id).select('-__v')
+  User.findById(req.user._id)
     .orFail(new Error('User not found'))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
@@ -31,7 +31,7 @@ const getCurrentUser = (req, res, next) => {
     .catch(next);
 };
 const getUserById = (req, res, next) => {
-  User.findById(req.params.id).select('-__v')
+  User.findById(req.params.id)
     .orFail(new Error('User not found'))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
@@ -70,7 +70,7 @@ const createUser = (req, res, next) => {
 };
 const updateUserInfo = (req, res, next) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true }).select('-__v')
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
         throw new Error('User not found');
@@ -90,7 +90,7 @@ const updateUserInfo = (req, res, next) => {
 };
 const updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true }).select('-__v')
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
         throw new Error('User not found');

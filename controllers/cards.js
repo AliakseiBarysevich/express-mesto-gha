@@ -19,10 +19,11 @@ const createCard = (req, res, next) => {
     .catch((err) => {
       // eslint-disable-next-line no-underscore-dangle
       if (err._message === 'card validation failed') {
-        throw new BadRequestError('Переданы некорректные данные при создании карточки.');
+        next(new BadRequestError('Переданы некорректные данные при создании карточки.'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
@@ -45,17 +46,18 @@ const deleteCard = (req, res, next) => {
 const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true }).select('-__v')
     .populate('owner')
-    .orFail(new Error('Card not found'))
+    .orFail(() => new NotFoundError('Карточка с указанным id не существует'))
     .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestError('Переданы некорректные данные для постановки лайка.');
+        next(new BadRequestError('Переданы некорректные данные для постановки лайка.'));
       }
       if (err.message === 'Card not found') {
-        throw new NotFoundError('Передан несуществующий _id карточки.');
+        next(new NotFoundError('Передан несуществующий _id карточки.'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true }).select('-__v')
@@ -64,13 +66,14 @@ const dislikeCard = (req, res, next) => {
     .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestError('Переданы некорректные данные для снятия лайка.');
+        next(new BadRequestError('Переданы некорректные данные для снятия лайка.'));
       }
       if (err.message === 'Card not found') {
-        throw new NotFoundError('Передан несуществующий _id карточки.');
+        next(new NotFoundError('Передан несуществующий _id карточки.'));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports = {

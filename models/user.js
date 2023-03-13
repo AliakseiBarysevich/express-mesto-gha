@@ -39,6 +39,11 @@ const userSchema = new mongoose.Schema({
     },
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
+  // удаление версии через versionKey почему-то не работало, поэтому нашел вот такой вот метод
+  __v: {
+    type: Number,
+    select: false,
+  },
 });
 
 // eslint-disable-next-line func-names

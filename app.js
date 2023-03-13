@@ -5,6 +5,7 @@ require('dotenv').config();
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
+const { handleError } = require('./middlewares/handleError');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -25,17 +26,6 @@ app.use(express.json());
 app.use('/', routes);
 
 app.use(errors());
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-
-  res
-    .status(statusCode)
-    .send({
-      message: statusCode === 500
-        ? 'На сервере произошла ошибка'
-        : message,
-    });
-  next();
-});
+app.use(handleError);
 
 app.listen(PORT);
